@@ -32,6 +32,7 @@ export const CATEGORY_LABELS: Record<BusinessCategory, string> = {
   manufacturing: "Manufacturing",
   services: "Services",
   trading: "Trading",
+  transport: "Transport",
   freelancing: "Freelancing",
   agriculture: "Agriculture",
   other: "Other",

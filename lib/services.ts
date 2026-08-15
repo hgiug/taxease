@@ -4,6 +4,7 @@ import { listRegistrations } from "@/data/registrations"
 import { listSchemes } from "@/data/schemes"
 import { listBusinessTypes } from "@/data/business-types"
 import { listSources } from "@/data/sources"
+import { evaluateTaxRules } from "@/data/tax-rules"
 import { analyzeBusiness } from "@/lib/rules-engine"
 
 /**
@@ -34,6 +35,11 @@ export function getSchemeCatalog() {
 
 export function getSourceCatalog() {
   return listSources()
+}
+
+/** Reference tax rules evaluated for the sample business (used by /api/rules). */
+export function getTaxCatalog() {
+  return evaluateTaxRules(DEMO_BUSINESS_PROFILE)
 }
 
 export function runAnalysis(profile: BusinessProfile) {

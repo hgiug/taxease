@@ -4,6 +4,9 @@ import type {
   BusinessStructure,
   Priority,
   ResultStatus,
+  SchemeMatchStatus,
+  SchemeType,
+  SourceType,
 } from "@/types"
 
 /** Formats an INR amount into a readable "₹12 lakh" style string. */
@@ -46,8 +49,34 @@ export const STRUCTURE_LABELS: Record<BusinessStructure, string> = {
 
 export const STATUS_LABELS: Record<ResultStatus, string> = {
   likely_applicable: "Likely applicable",
+  may_apply: "May apply",
+  conditional: "Conditional",
   review_needed: "Review needed",
-  no_action: "No immediate action",
+  not_identified: "Not identified",
+}
+
+export const SCHEME_MATCH_LABELS: Record<SchemeMatchStatus, string> = {
+  strong: "Strong potential match",
+  potential: "Potential match",
+  needs_verification: "Needs verification",
+  low: "Low match",
+}
+
+export const SCHEME_TYPE_LABELS: Record<SchemeType, string> = {
+  loan: "Loan",
+  subsidy: "Subsidy",
+  credit_support: "Credit support",
+  training: "Training",
+  incentive: "Incentive",
+  other: "Other benefit",
+}
+
+export const SOURCE_TYPE_LABELS: Record<SourceType, string> = {
+  government_portal: "Government portal",
+  scheme_guideline: "Scheme guideline",
+  reference_sheet: "Reference sheet",
+  press_release: "Press release",
+  other: "Other",
 }
 
 export const PRIORITY_LABELS: Record<Priority, string> = {

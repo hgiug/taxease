@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
 
@@ -40,19 +41,41 @@ const buttonVariants = cva(
   },
 )
 
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    /**
+     * Radix/shadcn-style escape hatch. When true and a single React element is
+     * passed as children, that element is rendered as the button root (bridged
+     * to Base UI's `render` prop). Lets `<Button asChild><Link/></Button>`
+     * render a proper anchor instead of a nested `<button><a>`.
+     */
+    asChild?: boolean
+  }
+
 function Button({
   className,
   variant = 'default',
   size = 'default',
+  asChild = false,
+  render,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
+  const useAsChild = asChild && React.isValidElement(children)
+  const resolvedRender = useAsChild ? (children as React.ReactElement) : render
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
+      render={resolvedRender}
       {...props}
-    />
+    >
+      {useAsChild ? undefined : children}
+    </ButtonPrimitive>
   )
 }
+
+export type { ButtonProps }
 
 export { Button, buttonVariants }

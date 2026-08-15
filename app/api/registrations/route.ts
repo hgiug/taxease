@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { listRegistrations } from "@/lib/services"
+import { getRegistrationCatalog } from "@/lib/services"
 
-// GET /api/registrations — returns demo registration rules.
+// GET /api/registrations — returns the reference registration catalog.
 export async function GET() {
-  return NextResponse.json({ registrations: listRegistrations(), isDemo: true })
+  return NextResponse.json({ registrations: getRegistrationCatalog(), isReferenceData: true })
 }

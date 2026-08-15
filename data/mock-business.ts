@@ -1,13 +1,17 @@
 import type { BusinessProfile } from "@/types"
 
 /**
- * DEMO DATA — a representative sample business profile.
- * Used as the default when the user has not completed the assessment,
- * and as the fallback result of the mock AI extraction.
+ * SAMPLE PROFILE ONLY.
+ *
+ * This is one example business used to seed an empty session so the UI is
+ * never blank. It carries NO special status — it flows through exactly the
+ * same extraction → engines → analysis pipeline as any business the user
+ * creates. No UI should ever assume these specific values.
  */
-export const MOCK_BUSINESS_PROFILE: BusinessProfile = {
-  id: "demo-business-1",
-  businessName: "Sunrise Bakery",
+export const DEMO_BUSINESS_PROFILE: BusinessProfile = {
+  id: "sample-business",
+  businessName: "Sample Bakery",
+  businessTypeId: "small_restaurant",
   businessCategory: "food_business",
   businessActivity: "bakery",
   state: "Rajasthan",
@@ -24,6 +28,10 @@ export const MOCK_BUSINESS_PROFILE: BusinessProfile = {
   gstRegistered: false,
   udyamRegistered: false,
   otherRegistrations: [],
+  specialCharacteristics: [],
   rawDescription:
     "I run a small bakery in Jaipur. We make around ₹12 lakh per year, have 3 employees and sell both from our shop and online.",
 }
+
+/** Backwards-compatible alias. */
+export const MOCK_BUSINESS_PROFILE = DEMO_BUSINESS_PROFILE

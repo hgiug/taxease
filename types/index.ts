@@ -1,6 +1,13 @@
 // Core domain types for TaxEase.
-// These are intentionally verbose and stable so the mock data/service layer
-// can later be swapped for a real database + rules engine without UI changes.
+//
+// These types describe a DATA-DRIVEN platform: adding a new business type,
+// registration, or scheme means adding data records — never new UI or new
+// hardcoded pages. The mock/reference data behind these shapes can later be
+// replaced by a verified database without any UI changes.
+
+/* -------------------------------------------------------------------------- */
+/*  Business profile                                                          */
+/* -------------------------------------------------------------------------- */
 
 export type BusinessCategory =
   | "food_business"
@@ -8,6 +15,7 @@ export type BusinessCategory =
   | "manufacturing"
   | "services"
   | "trading"
+  | "transport"
   | "freelancing"
   | "agriculture"
   | "other"
@@ -23,12 +31,14 @@ export type BusinessStructure =
 
 /**
  * Structured representation of a business. This is the object a real LLM
- * (via `extractBusinessProfile`) will populate, and the object the rules
- * engine consumes. Keep this shape stable.
+ * (via `extractBusinessProfile`) will populate, and the object every engine
+ * consumes. Keep this shape stable — engines and UI depend on it.
  */
 export interface BusinessProfile {
   id?: string
   businessName?: string
+  /** Optional link to a seeded BusinessType (see data/business-types.ts). */
+  businessTypeId?: string
   businessCategory: BusinessCategory
   businessActivity: string
   state: string
@@ -45,60 +55,172 @@ export interface BusinessProfile {
   gstRegistered: boolean
   udyamRegistered: boolean
   otherRegistrations?: string[]
+  specialCharacteristics?: string[]
   /** Free-text description the user originally provided, if any. */
   rawDescription?: string
 }
 
-export type ResultStatus = "likely_applicable" | "review_needed" | "no_action"
+/* -------------------------------------------------------------------------- */
+/*  Business type catalog                                                     */
+/* -------------------------------------------------------------------------- */
 
 /**
- * A source/evidence object. For the demo these use placeholder values.
- * Real official sources are inserted later without changing the shape.
+ * A seeded business type. This is the "spine" of the data-driven system:
+ * it links a recognisable business to the registrations, schemes and tax
+ * notes that MAY be relevant to it.
  */
-export interface Source {
+export interface BusinessType {
   id: string
-  sourceName: string // e.g. "OFFICIAL_SOURCE_PLACEHOLDER"
-  authority: string | null
-  sourceUrl: string | null
-  effectiveDate: string | null
-  lastVerified: string | null
-  ruleVersion?: string
+  label: string
+  category: BusinessCategory
+  /** Words used by the mock extractor to recognise this type in free text. */
+  keywords: string[]
+  description: string
+  /** Registration catalog ids potentially relevant to this business type. */
+  registrationIds: string[]
+  /** Scheme catalog ids potentially relevant to this business type. */
+  schemeIds: string[]
+  /** Short plain-language note about tax considerations (unverified). */
+  taxNote?: string
+  /** Source ids backing this reference row. */
+  referenceSourceIds?: string[]
 }
 
-export interface TaxRule {
-  id: string
-  category: "gst" | "income_tax" | "tds" | "other"
-  title: string
-  status: ResultStatus
-  reason: string
-  detail: string
-  sourceId: string
-}
+/* -------------------------------------------------------------------------- */
+/*  Status vocabularies                                                       */
+/* -------------------------------------------------------------------------- */
 
-export interface RegistrationRule {
-  id: string
-  title: string
-  status: ResultStatus
-  reason: string
-  detail: string
-  documents: string[]
-  applicationHint: string
-  sourceId: string
-}
+/**
+ * Deliberately non-absolute status vocabulary. We never assert that something
+ * legally applies unless it has been verified.
+ */
+export type ResultStatus =
+  | "likely_applicable"
+  | "may_apply"
+  | "conditional"
+  | "review_needed"
+  | "not_identified"
 
-export interface GovernmentScheme {
-  id: string
-  name: string
-  matchPercentage: number
-  whyItMatches: string
-  potentialBenefit: string
-  eligibility: string[]
-  documents: string[]
-  sourceId: string
-}
+export type SchemeMatchStatus = "strong" | "potential" | "needs_verification" | "low"
 
 export type Priority = "high" | "medium" | "low"
 export type ActionStatus = "not_started" | "in_progress" | "done"
+
+/* -------------------------------------------------------------------------- */
+/*  Sources                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export type SourceType =
+  | "government_portal"
+  | "scheme_guideline"
+  | "reference_sheet"
+  | "press_release"
+  | "other"
+
+/**
+ * A source/evidence object. URLs that appear here come from the reference
+ * spreadsheet and are NOT independently verified yet (`verified: false`).
+ */
+export interface Source {
+  id: string
+  name: string
+  authority?: string | null
+  url?: string | null
+  sourceType: SourceType
+  effectiveDate?: string | null
+  lastVerified?: string | null
+  /** When false the UI shows "Reference data — verification pending". */
+  verified: boolean
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Registrations                                                             */
+/* -------------------------------------------------------------------------- */
+
+/** Catalog record: a registration/licence that may apply to some businesses. */
+export interface RegistrationRule {
+  id: string
+  name: string
+  description: string
+  applicableBusinessTypes?: string[]
+  applicableCategories?: BusinessCategory[]
+  conditions?: string[]
+  stateSpecific?: boolean
+  authority?: string
+  documents?: string[]
+  officialUrl?: string | null
+  sourceId?: string
+  effectiveFrom?: string | null
+  lastVerified?: string | null
+}
+
+/** Engine output: how a registration rule applies to a specific profile. */
+export interface RegistrationResult {
+  rule: RegistrationRule
+  status: ResultStatus
+  priority: Priority
+  whyApplies: string
+  whatToVerify: string
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Schemes / loans / benefits                                                */
+/* -------------------------------------------------------------------------- */
+
+export type SchemeType = "loan" | "subsidy" | "credit_support" | "training" | "incentive" | "other"
+
+/** Catalog record: a government scheme / loan / benefit. */
+export interface BusinessScheme {
+  id: string
+  name: string
+  type: SchemeType
+  description: string
+  applicableBusinessTypes?: string[]
+  applicableCategories?: BusinessCategory[]
+  /** undefined ⇒ available nationally. */
+  states?: string[]
+  eligibilityConditions?: string[]
+  loanAmount?: string
+  subsidy?: string
+  interestRate?: string
+  benefits?: string[]
+  documents?: string[]
+  sourceId?: string
+  officialUrl?: string | null
+  lastVerified?: string | null
+}
+
+/** Engine output: how well a scheme matches a specific profile. */
+export interface SchemeMatch {
+  scheme: BusinessScheme
+  matchScore: number
+  status: SchemeMatchStatus
+  matchedConditions: string[]
+  missingConditions: string[]
+  reasons: string[]
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Tax                                                                       */
+/* -------------------------------------------------------------------------- */
+
+export type TaxCategory = "gst" | "income_tax" | "tds" | "other"
+
+export interface TaxRule {
+  id: string
+  category: TaxCategory
+  title: string
+  status: ResultStatus
+  reason: string
+  detail: string
+  sourceId: string
+  /** false ⇒ "Tax rules are currently being verified." */
+  verified: boolean
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Action plan                                                               */
+/* -------------------------------------------------------------------------- */
 
 export interface ActionItem {
   id: string
@@ -108,20 +230,32 @@ export interface ActionItem {
   description: string
   whyItMatters: string
   status: ActionStatus
-  sourceId: string
+  sourceId?: string
+  /** Relevant business context, e.g. "Based on your food business in Jaipur". */
+  relevantInfo?: string
 }
 
-/**
- * The full output of the rules engine for a given profile.
- */
-export interface AssessmentResult {
+/* -------------------------------------------------------------------------- */
+/*  Analysis result — the single object the whole dashboard renders from      */
+/* -------------------------------------------------------------------------- */
+
+export interface AnalysisResult {
   profile: BusinessProfile
+  businessTypeId?: string
   taxResults: TaxRule[]
-  registrationResults: RegistrationRule[]
-  schemeMatches: GovernmentScheme[]
+  registrations: RegistrationResult[]
+  schemes: SchemeMatch[]
   actionItems: ActionItem[]
   sources: Source[]
-  /** Flags that this result is demo/mock data, never real legal advice. */
-  isDemo: boolean
+  /** Flags that this result is built from reference/mock data, not verified law. */
+  isReferenceData: boolean
   generatedAt: string
+}
+
+/** A business the user is tracking (supports the "My Businesses" feature). */
+export interface SavedBusiness {
+  id: string
+  profile: BusinessProfile
+  result: AnalysisResult
+  createdAt: string
 }

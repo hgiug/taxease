@@ -1,34 +1,39 @@
 import type { BusinessProfile } from "@/types"
-import { MOCK_BUSINESS_PROFILE } from "@/data/mock-business"
-import { getTaxRules } from "@/data/mock-rules"
-import { getRegistrations } from "@/data/mock-registrations"
-import { getSchemes } from "@/data/mock-schemes"
+import { DEMO_BUSINESS_PROFILE } from "@/data/mock-business"
+import { listRegistrations } from "@/data/registrations"
+import { listSchemes } from "@/data/schemes"
+import { listBusinessTypes } from "@/data/business-types"
+import { listSources } from "@/data/sources"
 import { analyzeBusiness } from "@/lib/rules-engine"
 
 /**
  * SERVICE LAYER.
  *
- * All data access flows through these functions. Today they read from mock
- * data files; later they can read from PostgreSQL/Supabase without changing
- * any callers (API routes / UI). This is the seam for the future database
- * (tables: businesses, business_profiles, tax_rules, registration_rules,
- * government_schemes, sources, assessments, action_items, rule_versions).
+ * The single seam between the app and its data. Today these functions read
+ * from the local reference catalogs; later they can read from a verified
+ * database (tables: business_types, registrations, schemes, sources,
+ * tax_rules, businesses, assessments, action_items) without changing any
+ * caller (API routes / UI).
  */
 
 export function getDefaultBusiness(): BusinessProfile {
-  return MOCK_BUSINESS_PROFILE
+  return DEMO_BUSINESS_PROFILE
 }
 
-export function listRules() {
-  return getTaxRules()
+export function getBusinessTypes() {
+  return listBusinessTypes()
 }
 
-export function listRegistrations() {
-  return getRegistrations()
+export function getRegistrationCatalog() {
+  return listRegistrations()
 }
 
-export function listSchemes() {
-  return getSchemes()
+export function getSchemeCatalog() {
+  return listSchemes()
+}
+
+export function getSourceCatalog() {
+  return listSources()
 }
 
 export function runAnalysis(profile: BusinessProfile) {

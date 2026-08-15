@@ -7,7 +7,7 @@ import { Logo } from "@/components/brand/logo"
 import { cn } from "@/lib/utils"
 import { useStore } from "@/lib/store"
 import { PENDING_KEY } from "@/components/assessment/options"
-import type { AssessmentResult, BusinessProfile } from "@/types"
+import type { AnalysisResult, BusinessProfile } from "@/types"
 
 const STEPS = [
   "Reading your business details",
@@ -44,7 +44,7 @@ export function AnalyzingScreen() {
     })
 
     const analyze = async () => {
-      let result: AssessmentResult | null = null
+      let result: AnalysisResult | null = null
       try {
         const res = await fetch("/api/analyze-business", {
           method: "POST",
@@ -52,8 +52,7 @@ export function AnalyzingScreen() {
           body: JSON.stringify(payload ?? { description: "" }),
         })
         if (res.ok) {
-          const data = (await res.json()) as { result: AssessmentResult }
-          result = data.result
+          result = (await res.json()) as AnalysisResult
         }
       } catch {
         result = null

@@ -1,7 +1,6 @@
 import Link from "next/link"
-import { ClipboardList, FileCheck2, Gift, Receipt } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import type { AssessmentResult } from "@/types"
+import { ClipboardList, FileCheck2, Landmark, Receipt } from "lucide-react"
+import type { AnalysisResult } from "@/types"
 
 function StatCard({
   href,
@@ -33,20 +32,17 @@ function StatCard({
   )
 }
 
-export function OverviewStats({ result }: { result: AssessmentResult }) {
-  const applicableTax = result.taxResults.filter((t) => t.status !== "no_action").length
-  const pendingReg = result.registrationResults.filter((r) => r.status !== "no_action").length
+export function OverviewStats({ result }: { result: AnalysisResult }) {
+  const applicableTax = result.taxResults.filter((t) => t.status !== "not_identified").length
+  const pendingReg = result.registrations.filter(
+    (r) => r.status === "likely_applicable" || r.status === "may_apply" || r.status === "conditional",
+  ).length
+  const relevantSchemes = result.schemes.filter((s) => s.status !== "low").length
   const openActions = result.actionItems.filter((a) => a.status !== "done").length
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-      <StatCard
-        href="/compliance"
-        icon={Receipt}
-        value={applicableTax}
-        label="Tax items"
-        hint="may apply to you"
-      />
+      <StatCard href="/compliance" icon={Receipt} value={applicableTax} label="Tax items" hint="may apply to you" />
       <StatCard
         href="/registrations"
         icon={FileCheck2}
@@ -56,10 +52,10 @@ export function OverviewStats({ result }: { result: AssessmentResult }) {
       />
       <StatCard
         href="/benefits"
-        icon={Gift}
-        value={result.schemeMatches.length}
+        icon={Landmark}
+        value={relevantSchemes}
         label="Schemes"
-        hint="matched to you"
+        hint="potentially relevant"
       />
       <StatCard
         href="/action-plan"

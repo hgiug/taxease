@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { listRules } from "@/lib/services"
+import { getTaxCatalog } from "@/lib/services"
 
-// GET /api/rules — returns demo tax/compliance rules.
+// GET /api/rules — returns reference tax/compliance rules (verification pending).
 export async function GET() {
-  return NextResponse.json({ rules: listRules(), isDemo: true })
+  return NextResponse.json({ rules: getTaxCatalog(), isReferenceData: true })
 }

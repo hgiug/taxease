@@ -10,7 +10,7 @@ import { runAnalysis, getDefaultBusiness } from "@/lib/services"
  *  - { description: string }  -> mock AI extracts a profile, then analyzes it
  *  - { profile: BusinessProfile } -> analyzes the provided structured profile
  *
- * Returns a structured AssessmentResult (demo data).
+ * Returns a structured AnalysisResult (reference data).
  */
 export async function POST(request: Request) {
   let body: { description?: string; profile?: BusinessProfile } = {}

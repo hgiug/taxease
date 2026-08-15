@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
-import { listSchemes } from "@/lib/services"
+import { getSchemeCatalog } from "@/lib/services"
 
-// GET /api/schemes — returns demo government schemes.
+// GET /api/schemes — returns the reference scheme/loan/benefit catalog.
 export async function GET() {
-  return NextResponse.json({ schemes: listSchemes(), isDemo: true })
+  return NextResponse.json({ schemes: getSchemeCatalog(), isReferenceData: true })
 }

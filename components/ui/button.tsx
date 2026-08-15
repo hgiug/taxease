@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { Button as ButtonPrimitive } from '@base-ui/react/button'
 import { cva, type VariantProps } from 'class-variance-authority'
 
@@ -44,14 +45,45 @@ function Button({
   className,
   variant = 'default',
   size = 'default',
+  asChild = false,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & { asChild?: boolean }) {
+  // Support the shadcn/Radix `asChild` pattern on top of base-ui's `render`
+  // prop: `<Button asChild><Link>...</Link></Button>` renders the child element
+  // (e.g. a Link/anchor) with the button styling merged in, instead of nesting
+  // it inside a real <button>.
+  if (asChild && React.isValidElement(children)) {
+    const child = children as React.ReactElement<{
+      className?: string
+      children?: React.ReactNode
+    }>
+    const { className: childClassName, children: innerChildren, ...childProps } =
+      child.props
+
+    return (
+      <ButtonPrimitive
+        data-slot="button"
+        // The child is typically an anchor (e.g. a Link), not a native button.
+        nativeButton={false}
+        className={cn(buttonVariants({ variant, size, className }), childClassName)}
+        render={<child.type {...childProps} />}
+        {...props}
+      >
+        {innerChildren}
+      </ButtonPrimitive>
+    )
+  }
+
   return (
     <ButtonPrimitive
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {children}
+    </ButtonPrimitive>
   )
 }
 

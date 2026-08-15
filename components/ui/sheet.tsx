@@ -11,8 +11,22 @@ function Sheet({ ...props }: SheetPrimitive.Root.Props) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />
 }
 
-function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {
-  return <SheetPrimitive.Trigger data-slot="sheet-trigger" {...props} />
+function SheetTrigger({
+  asChild,
+  render,
+  children,
+  ...props
+}: SheetPrimitive.Trigger.Props & { asChild?: boolean }) {
+  if (asChild && React.isValidElement(children)) {
+    return (
+      <SheetPrimitive.Trigger data-slot="sheet-trigger" render={children} {...props} />
+    )
+  }
+  return (
+    <SheetPrimitive.Trigger data-slot="sheet-trigger" render={render} {...props}>
+      {children}
+    </SheetPrimitive.Trigger>
+  )
 }
 
 function SheetClose({ ...props }: SheetPrimitive.Close.Props) {
@@ -100,16 +114,23 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function SheetTitle({ className, ...props }: SheetPrimitive.Title.Props) {
+function SheetTitle({
+  className,
+  asChild,
+  render,
+  children,
+  ...props
+}: SheetPrimitive.Title.Props & { asChild?: boolean }) {
+  const resolvedRender = asChild && React.isValidElement(children) ? children : render
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn(
-        "text-base font-medium text-foreground",
-        className
-      )}
+      className={cn("text-base font-medium text-foreground", className)}
+      render={resolvedRender}
       {...props}
-    />
+    >
+      {asChild ? undefined : children}
+    </SheetPrimitive.Title>
   )
 }
 

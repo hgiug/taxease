@@ -6,6 +6,7 @@ export const CATEGORY_OPTIONS: { value: BusinessCategory; label: string }[] = [
   { value: "manufacturing", label: "Manufacturing" },
   { value: "services", label: "Services" },
   { value: "trading", label: "Trading" },
+  { value: "transport", label: "Transport" },
   { value: "freelancing", label: "Freelancing" },
   { value: "agriculture", label: "Agriculture" },
   { value: "other", label: "Other" },

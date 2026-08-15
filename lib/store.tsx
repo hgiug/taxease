@@ -22,6 +22,7 @@ interface StoreValue {
   result: AssessmentResult
   hasCompletedAssessment: boolean
   setProfile: (profile: BusinessProfile) => void
+  setResultDirect: (result: AssessmentResult) => void
   setActionStatus: (id: string, status: ActionStatus) => void
   reset: () => void
 }
@@ -70,6 +71,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [persist],
   )
 
+  const setResultDirect = useCallback(
+    (next: AssessmentResult) => {
+      setResult(next)
+      setHasCompleted(true)
+      persist(next, true)
+    },
+    [persist],
+  )
+
   const setActionStatus = useCallback(
     (id: string, status: ActionStatus) => {
       setResult((prev) => {
@@ -97,10 +107,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       result,
       hasCompletedAssessment,
       setProfile,
+      setResultDirect,
       setActionStatus,
       reset,
     }),
-    [result, hasCompletedAssessment, setProfile, setActionStatus, reset],
+    [result, hasCompletedAssessment, setProfile, setResultDirect, setActionStatus, reset],
   )
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>
